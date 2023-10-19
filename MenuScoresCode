@@ -1,0 +1,64 @@
+//menu y textos
+
+void infoGame(){ //se muestran diferentes pantallas según el estado del juego
+  if (state == 0){ //menu principal
+    fill(255,80,0);
+    textSize(100);
+    text("AIR ATTACK",65,yTitle);
+    if (yTitle < height/2-200){ //se anima el título
+      yTitle += 2;
+    }
+    if (yTitle == -10){ //evento para ejecutar la canción principal
+      intro.play();
+    }
+    if (yTitle == height/2-200){
+      fill(0,255,0);
+      int s = second(); //se hace intermitente
+      if (s%2 == 0){ 
+        textSize(50);
+        text("ENTER to START",150,height/2-30);
+      }
+      textSize(30);
+      text("LEFT/RIGHT -> MOVE",190,height/2+40);
+      text("CONTROL -> SHOOT",190,height/2+80);
+     }
+      
+  }
+  
+  if (state == 1){ //partida
+    fill(0,255,0);
+    textSize(30);
+    text("Points= "+points, 15,30);
+    if (lifePlayer == 1){
+      text(lifePlayer+" Life",15,60);
+    }else{
+      text(lifePlayer+" Lives",15,60);
+    }
+  }
+  if (state == 2){ //game over
+    fill(0,255,0);
+    textSize(100);
+    text("GAME OVER", 70,height/2-200);
+    textSize(60);
+    text("POINTS: "+points, 170,height/2-100);
+    int s= second();
+    if (s%2 == 0){
+      textSize(50);
+      text("ENTER to CONTINUE",110,height/2+80);
+    }
+  }
+}
+
+void pressContinue(){
+  if (deadState == true && lifePlayer >= 0){
+    fill(0,255,0);
+    textSize(40);
+    int s = second();
+    if (s%2 == 0){ //muestra el texto intermitente
+      text("PRESS ENTER TO CONTINUE", 90,height/2);
+    }
+  }if (deadState == true && lifePlayer < 0){
+    state = 2;
+    gameOver.play();
+  }
+}
