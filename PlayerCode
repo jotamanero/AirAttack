@@ -1,0 +1,176 @@
+//draw y mecánica del jugador
+
+void printPlayer(){ //muestra la animación del player
+  if (deadState == false){  
+    if (animePlayer >3){
+      animePlayer = 0;
+    }
+    image(playerAnimation[animePlayer],coordX,coordY,100,100);
+    animePlayer += 1;
+  }else {
+    if(deadState == true){ //se crea un bucle for para que se reproduzca una vez
+      image(playerDead[animePlayer],coordX,coordY,100,100);
+      animePlayer += 1;
+      }
+      if(animePlayer > 12){
+        animePlayer = 0;
+      }
+  }
+}
+
+//clase para los disparos
+class Bullet{
+  int speed,yPos,xPos,life;
+  
+  Bullet (int x, int y){
+    xPos = x+50;
+    yPos = y;
+    speed = 10;
+    life = 1;
+  }
+  
+  void move(){ //dibuja y actuliza posición
+    yPos -= speed;
+    stroke(255, 128, 0);
+    strokeWeight(4);
+    fill(255, 255, 0);
+    ellipse (xPos, yPos,10,10);
+    if (yPos < 0){
+      life = 0;
+    }
+    
+  }
+  
+  void impact(){ //calcula colisión
+    for (int i = enemies.size()-1; i >= 0; i--) { 
+      Enemy enemy = enemies.get(i); //se coge un objeto de la arraylist
+      float impactBullet = dist(xPos+5,yPos+5,enemy.xPos+50,enemy.yPos+50);
+      if(impactBullet < 50){
+        enemy.life = 0;
+        life = 0;
+        exploEnemy.play();
+        points += 20;
+      }
+    } 
+  }
+  
+  boolean dead(){ //verifica si hay que eliminar el objeto
+    if (life == 0){
+      return true;
+    }else {
+      return false;
+    }
+  }  
+}
+
+void shootPlayer(){ //se dibujan los disparos
+  for (int i = bullets.size()-1; i >= 0; i--) { 
+    Bullet bullet = bullets.get(i); //se coge un objeto de la arraylist
+    bullet.move();
+    bullet.impact();
+    if (bullet.dead()) {
+      // Se elimina objeto para limitar la arraylist
+      bullets.remove(i);
+    }    
+  } 
+}
+
+void tempShoot(){ //dejara 2s entre disparos del jugador
+  if (t < 20){
+    t +=1;
+  }
+}
+
+void resetGame(){
+  lifePlayer = 2;
+  points = 0;
+  deadState = false;
+  t = 0;
+  yTitle = -20;
+  //se vacían arraylilsts
+  for (int i = enemies.size()-1; i >= 0; i--) { 
+    enemies.remove(i);
+  }
+  for (int i = bullets.size()-1; i >= 0; i--) { 
+    bullets.remove(i);
+  }
+  for (int i = bulletsE.size()-1; i >= 0; i--) { 
+    bulletsE.remove(i);
+  }
+  
+}
+
+
+//funciones para los controles
+void keyPressed() { 
+  
+  if(keyCode == RIGHT) { 
+    right = true;
+  }
+  if(keyCode == LEFT) { 
+    left = true;
+  }
+  if(keyCode == RIGHT) { 
+    right = true;
+  }
+  if(keyCode == CONTROL) { 
+    control = true;
+  }
+  if(keyCode == ENTER) { 
+    enter = true;
+  }
+}
+
+void keyReleased(){
+  if(keyCode == RIGHT) { 
+    right = false;
+  }
+  if(keyCode == LEFT) { 
+    left = false;
+  }
+   if(keyCode == CONTROL) { 
+    control = false;
+  } 
+  if(keyCode == ENTER) { 
+    enter = false;
+  }
+  
+}
+
+void controls(){ //se crea una función controls para que la respuesta de los controles
+                 //sea inmediata
+  if(right == true && deadState == false) { 
+    if(coordX < width-50){
+      coordX += 6;
+    }
+   }
+   if(left == true && deadState == false) { 
+     if(coordX > -50){
+       coordX -= 6;
+     }
+   }
+   if(control == true && t == 20) { 
+      if( bullets.size() < 5 && deadState == false){ //condición para crear nuevo disparo
+      bullets.add(new Bullet(coordX,coordY)); //se añade nuevo objeto a la arraylist
+      shootPlayer.play();
+      t = 0;
+     }
+   }
+   if(enter == true) { //diferentes opciones para ENTER 
+     if(deadState == true && state == 1){ //nueva vida en partida
+       newLife.play();
+       playing.play();
+       deadState = false;
+     }
+     if(state == 0 && yTitle == height/2-200){ //Ejecuta juego
+       resetGame();
+       intro.stop();
+       newLife.play();
+       playing.play();
+       state = 1;
+     }
+     if(state == 2){ //vuelve al inicio
+       state = 0;
+     }
+   }   
+}
