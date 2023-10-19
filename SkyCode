@@ -1,0 +1,49 @@
+//se crean clase para las nubes
+class Cloud{
+  float speed,yPos,xPos;
+  
+  Cloud (){
+    xPos = random(0,width);
+    yPos = 0;
+    speed = random(2,6);
+  }
+  
+  void move(){
+    yPos += speed;
+  }
+  
+  void displayCloud(){
+    noStroke();
+    fill(255);
+    ellipse (xPos,yPos,60,30);
+    ellipse (xPos+40,yPos,80,50);
+    ellipse (xPos+80,yPos,60,30);
+  }
+  
+  
+  boolean noDisplay(){
+    if (yPos < height){
+      return false;
+    }else {
+      return true;
+    }
+  }
+}
+
+//funcion para dibujar nubes
+void printClouds(){
+  newCloud = random(0,1000);
+  if(clouds.size() < 10 && newCloud > 970){ //condición para crear nueva nube random
+    clouds.add(new Cloud()); //se añade nuevo objeto a la arraylist
+    }
+  for (int i = clouds.size()-1; i >= 0; i--) { 
+    Cloud cloud = clouds.get(i); //se coge un objeto de la arraylist
+    cloud.move();
+    cloud.displayCloud();
+    if (cloud.noDisplay()) {
+      // Se elimina objeto para limitar la arraylist
+      clouds.remove(i);
+    }
+    
+  }   
+}
