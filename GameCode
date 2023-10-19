@@ -1,0 +1,153 @@
+//AIR ATTACK - Shooter de aviones de scroll vertical
+//Autor: José María Manero Caballero
+//------------------------------------------------------
+
+//Controles:
+//Flechas IZQ/DER para controlar el avión
+//Ctrl para disparar
+//Sprites creados en https://www.piskelapp.com/
+
+//Audio:
+
+ //https://freemusicarchive.org/music/holiznacc0/chiptunes/red-skies/
+ //CC0 1.0 Universal (CC0 1.0) Public Domain Dedication
+
+ //https://freesound.org/people/bainmack/sounds/624351/
+ //CC0 1.0 Universal (CC0 1.0) Public Domain Dedication
+
+ //https://freesound.org/people/jjcunning/sounds/578191/ 
+ //CC0 1.0 Universal (CC0 1.0) Public Domain Dedication
+
+ //https://freesound.org/people/MATRIXXX_/sounds/403298/
+ //CC0 1.0 Universal (CC0 1.0) Public Domain Dedication
+ 
+ //https://freesound.org/people/MATRIXXX_/sounds/495453/
+ //CC0 1.0 Universal (CC0 1.0) Public Domain Dedication
+ 
+ //https://freesound.org/people/MATRIXXX_/sounds/515005/
+ //CC0 1.0 Universal (CC0 1.0) Public Domain Dedication
+ 
+ //https://freesound.org/people/bolkmar/sounds/455918/
+ //CC0 1.0 Universal (CC0 1.0) Public Domain Dedication
+ 
+ //https://freesound.org/people/jacksonacademyashmore/sounds/402816/
+ //CC0 1.0 Universal (CC0 1.0) Public Domain Dedication
+
+//-------------------------------------------------------
+
+import processing.sound.*;//se carga librería sonido
+
+//se declaran variables
+ArrayList<Cloud> clouds;
+ArrayList<Enemy> enemies;
+ArrayList<Bullet> bullets;
+ArrayList<BulletE> bulletsE;
+float newCloud,newEnemy; //random para nueva nube
+PImage[] playerAnimation = new PImage[4]; //Sprite para  player
+PImage[] enemyAnimation = new PImage[4]; //Sprite para avión enemigo
+PImage[] enemyDead = new PImage[12]; //Sprite para  muerte enemigo
+PImage[] playerDead = new PImage[13]; //Sprite muerte player
+//variables para player;
+int yTitle,coordX,coordY, lifePlayer,animePlayer,t,points,state;
+boolean left, right,control,enter,deadState;
+//se crean sonidos
+SoundFile intro,playing,shootPlayer,shootEnem,gameOver,exploPlayer,exploEnemy,newLife,newEnem;
+
+void setup(){
+  size(720,1080); //resolución vertical para futura integración a dispositivo móvil
+  frameRate(60); //se limita el framerate a 60fps
+  //Se crean arralist para objetos
+  clouds = new ArrayList<Cloud>(); 
+  enemies = new ArrayList<Enemy>();
+  bullets = new ArrayList<Bullet>();
+  bulletsE = new ArrayList<BulletE>();
+  //se cargan imagenes de sprites
+  playerAnimation[0] = loadImage("player1.png");
+  playerAnimation[1] = loadImage("player2.png");
+  playerAnimation[2] = loadImage("player3.png");
+  playerAnimation[3] = loadImage("player4.png");
+  enemyAnimation[0] = loadImage("Enemy1.png");
+  enemyAnimation[1] = loadImage("Enemy2.png");
+  enemyAnimation[2] = loadImage("Enemy3.png");
+  enemyAnimation[3] = loadImage("Enemy4.png");
+  enemyDead[0] = loadImage("Explosion1.png");
+  enemyDead[1] = loadImage("Explosion2.png");
+  enemyDead[2] = loadImage("Explosion3.png");
+  enemyDead[3] = loadImage("Explosion4.png");
+  enemyDead[4] = loadImage("Explosion5.png");
+  enemyDead[5] = loadImage("Explosion6.png");
+  enemyDead[6] = loadImage("Explosion7.png");
+  enemyDead[7] = loadImage("Explosion8.png");
+  enemyDead[8] = loadImage("Explosion9.png");
+  enemyDead[9] = loadImage("Explosion10.png");
+  enemyDead[10] = loadImage("Explosion11.png");
+  enemyDead[11] = loadImage("Explosion12.png");
+  playerDead[0] = loadImage("playerDead1.png");
+  playerDead[1] = loadImage("playerDead2.png");
+  playerDead[2] = loadImage("playerDead3.png");
+  playerDead[3] = loadImage("playerDead4.png");
+  playerDead[4] = loadImage("playerDead5.png");
+  playerDead[5] = loadImage("playerDead6.png");
+  playerDead[6] = loadImage("playerDead7.png");
+  playerDead[7] = loadImage("playerDead8.png");
+  playerDead[8] = loadImage("playerDead9.png");
+  playerDead[9] = loadImage("playerDead10.png");
+  playerDead[10] = loadImage("playerDead11.png");
+  playerDead[11] = loadImage("playerDead12.png");
+  playerDead[12] = loadImage("playerDead13.png");
+  //se cargan sonidos
+  intro = new SoundFile(this, "intro.wav");
+  playing = new SoundFile(this, "playing.wav");
+  shootPlayer = new SoundFile(this, "PlayerShoot.wav");
+  shootEnem = new SoundFile(this, "shootEnem.wav");
+  gameOver = new SoundFile(this, "gameOver.wav");
+  newLife = new SoundFile(this, "newLife.wav");
+  newEnem = new SoundFile(this, "newEnemy.wav");
+  exploPlayer = new SoundFile(this, "ExploPlayer.wav");
+  exploEnemy = new SoundFile(this, "ExploEnemy.wav");
+  //se inicializa es estado del juego
+  state = 0; //menú principal
+  
+  //se inicializan variables partida y player
+  coordX = width/2 - 50; //coordenadas de inicio
+  coordY = height - 150;
+  lifePlayer = 2; //vidas restantes
+  animePlayer = 0; //controla animación de sprites
+  yTitle = -20;
+  t = 20;
+  points = 0;
+  deadState = false;
+}
+
+
+void draw(){
+  switch(state){
+    case 0:
+    background(0,100,255);
+    controls();
+    printClouds();
+    infoGame();
+    break;
+    
+    case 1:
+    background(0,100,255);
+    controls();
+    printEnemies();
+    printPlayer();
+    shootPlayer();
+    shootEnemies();
+    printClouds();//se printan despúes para dificultar la visivilidad del juego 
+    tempShoot();
+    pressContinue();
+    infoGame();
+    break;
+    
+    case 2:
+    background(0,100,255);
+    controls();
+    printClouds();
+    infoGame();
+    break;
+  }
+  
+}
